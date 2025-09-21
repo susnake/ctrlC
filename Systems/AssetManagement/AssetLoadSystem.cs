@@ -215,7 +215,8 @@ namespace ctrlC.Systems.AssetManagement
                     using (StreamReader sr = new StreamReader(cidFilename))
                     {
                         var CID = sr.ReadToEnd().Trim();
-                        AssetDatabase.user.AddAsset<PrefabAsset>(path, CID);
+                        var hash = new Colossal.Hash128(CID); // or, if available: // var hash = Colossal.Hash128.Parse(CID);
+                        AssetDatabase.user.AddAsset<PrefabAsset>(path, hash);
                     }
                 }
                 catch (Exception e)

@@ -41,6 +41,7 @@ namespace ctrlC
         internal static Setting m_Setting;
 
         private static readonly string[] compatibleGameVersions = { "1.1.10f1", "1.1.11f1" };
+        private static readonly string[] compatibleVersionPrefixes = { "1.3." };
         private const bool devMode = false;
 
 
@@ -86,7 +87,11 @@ namespace ctrlC
             m_Setting.RegisterKeyBindings();
             AssetDatabase.global.LoadSettings(nameof(ctrlC), m_Setting, new Setting(this));
 
-            if (compatibleGameVersions.Contains(currentGameVersion) || devMode)
+            bool isCompatible = compatibleGameVersions.Contains(currentGameVersion)
+                || compatibleVersionPrefixes.Any(prefix => currentGameVersion.StartsWith(prefix))
+                || devMode;
+
+            if (isCompatible)
             {
                 m_ModUISystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<ModUISystem>();
                 ReadCategoryNames(m_Setting.Category1Name, m_Setting.Category2Name, m_Setting.Category3Name, m_Setting.Category4Name);
@@ -96,7 +101,7 @@ namespace ctrlC
             }
             else
             {
-                log.Warn($"CtrlC is outdated! Current version of ctrlC is only compatible with game versions '{string.Join(", ", compatibleGameVersions)}' and the current game version is '{currentGameVersion}'");
+                log.Warn($"CtrlC is outdated! Current version of ctrlC is only compatible with game versions '{string.Join(", ", compatibleGameVersions.Concat(compatibleVersionPrefixes))}' and the current game version is '{currentGameVersion}'");
                 log.Info($"For more info, visit {PathConstants.XLink}");
                 HandleOutdatedMod();
             }

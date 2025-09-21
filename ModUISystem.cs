@@ -74,9 +74,13 @@ namespace ctrlC
             if (mode == GameMode.Game)
             {
                 CheckBindingsForCKey();
+
+                // Биндим именно Ctrl+C
                 _CBtn = new InputAction("cbtn", InputActionType.Button);
-                _CBtn.AddBinding("<Keyboard>/C");
+                _CBtn.AddBinding("<Keyboard>/ctrl+c");
                 _CBtn.Enable();
+
+                Log.Info("InputAction for Ctrl+C initialized");
             }
         }
 
@@ -124,16 +128,22 @@ namespace ctrlC
         protected override void OnUpdate()
         {
             base.OnUpdate();
+
+            // Логируем состояние клавиш каждый кадр
+            bool ctrl = Keyboard.current != null && (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed);
+            bool c = Keyboard.current != null && Keyboard.current.cKey.isPressed;
+            Log.Debug($"Update: Ctrl pressed={ctrl}, C pressed={c}");
+
             if (selectionTool.Enabled || placementTool.Enabled)
             {
-                if (_CBtn.WasPerformedThisFrame())
+                if (_CBtn != null && _CBtn.WasPerformedThisFrame())
                 {
-                    log.Info("cbtn performed");
-                    DisableConflictingInputs();
+                    Log.Info("Ctrl+C performed (WasPerformedThisFrame)");
+                    StartMod(); // или TogglePrefabMenu(), или другое действие
                 }
-                else if (_CBtn.WasReleasedThisFrame())
+                else if (_CBtn != null && _CBtn.WasReleasedThisFrame())
                 {
-                    log.Info("cbtn released");
+                    Log.Info("Ctrl+C released (WasReleasedThisFrame)");
                     EnableConflictingInputs();
                 }
             }
